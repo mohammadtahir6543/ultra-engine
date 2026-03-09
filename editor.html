@@ -2,37 +2,49 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine | Free Asset Store</title>
+    <title>Ultra Engine | Fixed Store</title>
     <style>
-        body { background: #000; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        body { background: #000; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
         /* Intro & Start Screens */
-        #intro { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; transition: 1s; }
+        #intro { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; }
         #start-screen { position: fixed; inset: 0; background: #050505; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; cursor: pointer; }
         .ultra-text { font-size: 80px; font-weight: bold; letter-spacing: 20px; animation: glow 2s infinite alternate; }
         
         /* Layout */
-        #editor-ui { display: none; flex-direction: column; height: 100vh; }
-        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 1000; }
-        #workspace { display: flex; flex: 1; position: relative; overflow: hidden; }
+        #editor-ui { display: none; flex-direction: column; height: 100vh; width: 100vw; }
+        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; }
         
-        /* Panels */
-        #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; z-index: 10; }
-        .panel { width: 230px; background: #0a0a0a; border-left: 2px solid #222; padding: 15px; z-index: 100; overflow-y: auto; }
+        #workspace { display: flex; flex: 1; width: 100%; position: relative; overflow: hidden; }
+        
+        /* Canvas (Center) */
+        #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; }
+        
+        /* ASSET STORE PANEL (Right) */
+        #store-panel { 
+            width: 280px; 
+            background: #0a0a0a; 
+            border-left: 3px solid #222; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 15px;
+            z-index: 100;
+        }
 
-        /* Asset Cards */
+        /* Asset Grid */
         .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .asset-card { background: #111; border: 1px solid #333; padding: 5px; border-radius: 5px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .asset-card:hover { border-color: #00ff88; background: #1a1a1a; }
-        .asset-img { width: 100%; height: 60px; object-fit: contain; }
+        .asset-card { background: #151515; border: 1px solid #333; padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; }
+        .asset-card:hover { border-color: #00ff88; transform: translateY(-2px); }
+        .asset-img { width: 100%; height: 70px; object-fit: contain; background: #000; border-radius: 4px; }
 
         /* Nodes & Preview */
-        .node { width: 140px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 500; }
+        .node { width: 140px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 50; }
         .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 11px; }
-        #play-preview { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 400px; height: 200px; background: #000; border: 2px solid #ffcc00; display: none; z-index: 1000; border-radius: 10px; }
-        #player { width: 40px; height: 40px; background: #00ff88; position: absolute; bottom: 20px; left: 10px; background-size: contain; background-repeat: no-repeat; }
+        
+        #play-preview { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 450px; height: 220px; background: #000; border: 3px solid #ffcc00; display: none; z-index: 1000; border-radius: 12px; overflow: hidden; background-size: cover; }
+        #player { width: 50px; height: 50px; position: absolute; bottom: 20px; left: 10px; background-size: contain; background-repeat: no-repeat; background-position: center; }
 
-        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 12px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
         @keyframes glow { from { text-shadow: 0 0 10px #00ff88; opacity: 0.5; } to { text-shadow: 0 0 40px #00ff88; opacity: 1; } }
     </style>
 </head>
@@ -41,24 +53,118 @@
     <div id="intro"><div class="ultra-text">ULTRA</div></div>
 
     <div id="start-screen" onclick="launchEditor()">
-        <h1 style="color:#00ff88;">ULTRA ENGINE PRO</h1>
-        <p style="color:#555;">CLICK TO START YOUR PROJECT</p>
+        <h1 style="color:#00ff88; font-size: 50px;">ULTRA ENGINE</h1>
+        <p style="color:#666; letter-spacing: 5px;">CLICK TO START PROJECT</p>
     </div>
 
     <div id="editor-ui">
         <div id="nav">
-            <strong>🌀 ULTRA</strong>
+            <strong>🌀 ULTRA PRO</strong>
             <button class="btn" onclick="spawnNode('Move')">+ Move Node</button>
             <button class="btn" style="background:#ffcc00; color:#000;" onclick="togglePlay()">▶ PLAY GAME</button>
-            <button class="btn" style="margin-left:auto;" onclick="alert('Cloud Sync Active')">☁️ Save</button>
+            <button class="btn" style="margin-left:auto;" onclick="alert('Syncing to Cloud...')">☁️ SAVE</button>
         </div>
 
         <div id="workspace">
             <div id="canvas"></div>
             
-            <div class="panel">
-                <h3 style="margin:0; color:#00ff88; font-size:16px;">FREE ASSETS</h3>
+            <div id="store-panel">
+                <h3 style="margin:0; color:#00ff88; border-bottom: 1px solid #222; padding-bottom: 10px;">ASSET STORE</h3>
+                <p style="font-size: 11px; color:#555; margin: 10px 0;">Unity Style - 100% Free</p>
+                
                 <div class="asset-grid">
-                    <div class="asset-card" onclick="setHero('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png')">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" class="asset-img">
-                        <div
+                    <div class="asset-card" onclick="setHero('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png')">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" class="asset-img">
+                        <div style="font-size:10px; margin-top:5px;">Pikachu</div>
+                    </div>
+                    <div class="asset-card" onclick="setHero('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png')">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png" class="asset-img">
+                        <div style="font-size:10px; margin-top:5px;">Charmander</div>
+                    </div>
+                    <div class="asset-card" onclick="setBG('https://img.freepik.com/free-vector/nature-scene-with-forest-landscape-background_1308-51834.jpg')">
+                        <img src="https://img.freepik.com/free-vector/nature-scene-with-forest-landscape-background_1308-51834.jpg" class="asset-img">
+                        <div style="font-size:10px; margin-top:5px;">Forest BG</div>
+                    </div>
+                    <div class="asset-card" onclick="setBG('https://static.vecteezy.com/system/resources/thumbnails/000/271/573/small/vector-desert-landscape-illustration.jpg')">
+                        <img src="https://static.vecteezy.com/system/resources/thumbnails/000/271/573/small/vector-desert-landscape-illustration.jpg" class="asset-img">
+                        <div style="font-size:10px; margin-top:5px;">Desert BG</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="play-preview">
+        <div id="player"></div>
+    </div>
+
+    <script>
+        let isPlaying = false;
+        let playerX = 10;
+        let loop = null;
+
+        // Intro
+        setTimeout(() => {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+        }, 2000);
+
+        function launchEditor() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('editor-ui').style.display = 'flex';
+        }
+
+        // Asset Logic
+        function setHero(url) {
+            const p = document.getElementById('player');
+            p.style.backgroundImage = `url(${url})`;
+            p.style.backgroundColor = "transparent";
+            alert("Character Ready!");
+        }
+
+        function setBG(url) {
+            document.getElementById('play-preview').style.backgroundImage = `url(${url})`;
+            alert("World Theme Applied!");
+        }
+
+        function spawnNode(type) {
+            const n = document.createElement('div');
+            n.className = 'node';
+            n.style.left = '100px'; n.style.top = '100px';
+            n.innerHTML = `<div class="node-header">${type}</div><div style="height:40px;"></div>`;
+            document.getElementById('canvas').appendChild(n);
+            makeDraggable(n);
+        }
+
+        function togglePlay() {
+            const preview = document.getElementById('play-preview');
+            isPlaying = !isPlaying;
+            preview.style.display = isPlaying ? 'block' : 'none';
+            if(isPlaying) {
+                loop = setInterval(() => {
+                    playerX += 6;
+                    if(playerX > 400) playerX = 0;
+                    document.getElementById('player').style.left = playerX + "px";
+                }, 30);
+            } else {
+                clearInterval(loop);
+                playerX = 10;
+            }
+        }
+
+        function makeDraggable(el) {
+            let p1=0, p2=0, p3=0, p4=0;
+            el.onmousedown = (e) => {
+                p3 = e.clientX; p4 = e.clientY;
+                document.onmouseup = () => { document.onmouseup=null; document.onmousemove=null; };
+                document.onmousemove = (e) => {
+                    p1 = p3 - e.clientX; p2 = p4 - e.clientY;
+                    p3 = e.clientX; p4 = e.clientY;
+                    el.style.top = (el.offsetTop - p2) + "px";
+                    el.style.left = (el.offsetLeft - p1) + "px";
+                };
+            }
+        }
+    </script>
+</body>
+</html>
