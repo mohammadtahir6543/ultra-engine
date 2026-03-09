@@ -103,6 +103,30 @@
     function updateLines() {
         // Isme hum saari purani lines ko refresh karenge jab node hilega
     }
+    // Engine ka Brain
+let engineData = {
+    nodes: [],
+    connections: []
+};
+
+// Jab bhi koi naya node banega, wo is list mein add hoga
+function registerNode(id, type, x, y) {
+    engineData.nodes.push({
+        id: id,
+        type: type,
+        position: {x: x, y: y},
+        properties: { speed: 0, jumpHeight: 0 }
+    });
+}
+
+// Do nodes ko jodne ka logic
+function connectNodes(startNodeId, endNodeId) {
+    engineData.connections.push({
+        from: startNodeId,
+        to: endNodeId
+    });
+    console.log("Logic Linked: " + startNodeId + " -> " + endNodeId);
+}
 </script>
 
 </body>
