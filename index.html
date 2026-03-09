@@ -5,106 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultra Engine | Cloud Native</title>
     <style>
-        body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        body { background: #000; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100vh; }
         
-        /* 1. ANIMATED INTRO (Phase 1) */
-        #intro-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: flex; align-items: center; justify-content: center; z-index: 1000;
-            transition: opacity 1s ease;
-        }
-        .ultra-glow {
-            font-size: 80px; font-weight: bold; color: #00ff88;
-            letter-spacing: 15px; animation: glow-pulse 2s infinite alternate;
-        }
+        /* Intro Screen */
+        #intro { position: fixed; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 10; transition: 1s; }
+        .glow { font-size: 70px; font-weight: bold; color: #00ff88; letter-spacing: 15px; animation: pulse 2s infinite; }
 
-        /* 2. CLICK TO START (Phase 2) */
-        #start-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #050505; display: none; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 900;
-            cursor: pointer;
-        }
-        .start-text { font-size: 20px; color: #888; animation: blink 1.5s infinite; }
+        /* Start Screen */
+        #start-screen { display: none; text-align: center; z-index: 5; cursor: pointer; }
+        .start-btn { font-size: 25px; color: #00ff88; animation: blink 1.5s infinite; margin-top: 20px; }
 
-        /* 3. FINAL DASHBOARD (Phase 3) */
-        #dashboard {
-            display: none; padding: 50px; text-align: center; opacity: 0;
-            transition: opacity 1s ease;
-        }
-        .main-box { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 50px; }
-        .card { background: #111; border: 1px solid #222; padding: 30px; border-radius: 20px; width: 280px; transition: 0.4s; }
-        .card:hover { border-color: #00ff88; transform: translateY(-5px); }
-        .btn { background: #00ff88; color: black; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; display: block; width: 100%; margin-top: 10px; text-decoration: none; }
-        .btn-web { background: transparent; border: 1px solid #00ff88; color: #00ff88; }
-
-        /* Animations */
-        @keyframes glow-pulse {
-            from { text-shadow: 0 0 10px #00ff88; opacity: 0.5; }
-            to { text-shadow: 0 0 40px #00ff88; opacity: 1; }
-        }
-        @keyframes blink {
-            0% { opacity: 0.2; }
-            50% { opacity: 1; }
-            100% { opacity: 0.2; }
-        }
+        /* Dashboard */
+        #dashboard { display: none; text-align: center; width: 90%; max-width: 800px; }
+        .box { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+        .card { background: #111; border: 1px solid #333; padding: 20px; border-radius: 15px; width: 250px; }
+        .btn { background: #00ff88; color: #000; padding: 10px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; text-decoration: none; display: block; }
         
-        /* Eye Protection Overlay */
-        .eye-safe { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; background: rgba(255, 165, 0, 0.03); z-index: 2000; }
+        @keyframes pulse { from { opacity: 0.3; text-shadow: 0 0 10px #00ff88; } to { opacity: 1; text-shadow: 0 0 40px #00ff88; } }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="eye-safe"></div>
+    <div id="intro"><div class="glow">ULTRA</div></div>
 
-    <div id="intro-screen">
-        <div class="ultra-glow">ULTRA</div>
-    </div>
-
-    <div id="start-screen" onclick="showDashboard()">
-        <h1 style="color:#00ff88; font-size: 40px;">ULTRA ENGINE</h1>
-        <div class="start-text">Click to Start</div>
+    <div id="start-screen" onclick="openDash()">
+        <h1 style="color:#00ff88; font-size: 50px;">ULTRA ENGINE</h1>
+        <div class="start-btn">CLICK TO START</div>
     </div>
 
     <div id="dashboard">
-        <div style="color: #00ff88; font-weight: bold;">🌀 DASHBOARD</div>
-        <h2>Choose Your Workspace</h2>
-        <p style="color:#666;">Zero Local Storage | Email Cloud Active</p>
-
-        <div class="main-box">
+        <h2 style="color:#00ff88;">WELCOME TO ULTRA DASHBOARD</h2>
+        <p style="color:#888;">No Storage Used | Cloud Sync Active</p>
+        <div class="box">
             <div class="card">
-                <h3>Download App</h3>
-                <p>PC aur Mobile ke liye installer download karein.</p>
-                <button class="btn" onclick="alert('Downloading PC Engine...')">Get for PC</button>
-                <button class="btn" onclick="alert('Downloading Android APK...')">Get for Mobile</button>
+                <h3>Native App</h3>
+                <button class="btn" onclick="alert('Downloading PC Installer...')">Download for PC</button>
+                <button class="btn" onclick="alert('Downloading Android APK...')">Download for Mobile</button>
             </div>
             <div class="card">
-                <h3>Cloud Editor</h3>
-                <p>Bina install kiye browser mein development shuru karein.</p>
-                <button class="btn btn-web" onclick="alert('Launching Online Editor...')">Start Online</button>
+                <h3>Cloud Workspace</h3>
+                <button class="btn" style="background:none; border:1px solid #00ff88; color:#00ff88;" onclick="alert('Launching Online Editor...')">Run Online</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Start sequence
-        window.onload = function() {
-            // 3.5 seconds baad Intro hatakar 'Click to Start' dikhana
+        // Intro sequence
+        setTimeout(() => {
+            document.getElementById('intro').style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('intro-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('intro-screen').style.display = 'none';
-                    document.getElementById('start-screen').style.display = 'flex';
-                }, 1000);
-            }, 3500);
-        };
+                document.getElementById('intro').style.display = 'none';
+                document.getElementById('start-screen').style.display = 'block';
+            }, 1000);
+        }, 3000);
 
-        function showDashboard() {
-            // Click karne par Dashboard dikhana
+        function openDash() {
             document.getElementById('start-screen').style.display = 'none';
-            const dash = document.getElementById('dashboard');
-            dash.style.display = 'block';
-            setTimeout(() => { dash.style.opacity = '1'; }, 100);
+            document.getElementById('dashboard').style.display = 'block';
         }
     </script>
 </body>
