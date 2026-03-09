@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine Pro | Functional Version</title>
+    <title>Ultra Engine Pro | Box Fix</title>
     <style>
         body { background: #050505; color: #00ff88; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
         #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 1000; }
@@ -11,10 +11,15 @@
         #workspace { display: flex; flex: 1; position: relative; }
         #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; }
         #side-panel { width: 250px; background: #0a0a0a; border-left: 2px solid #222; padding: 20px; z-index: 100; }
+        
+        /* Play Preview Window */
         #play-preview { position: fixed; bottom: 20px; right: 270px; width: 250px; height: 150px; background: #000; border: 2px solid #ffcc00; display: none; z-index: 500; border-radius: 10px; overflow: hidden; }
+        #player { width: 25px; height: 25px; background: #00ff88; position: absolute; bottom: 20px; left: 10px; transition: 0.05s linear; box-shadow: 0 0 10px #00ff88; }
+
+        /* Node Design */
         .node { width: 140px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 10; cursor: move; }
-        .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 11px; }
-        input { background: #111; border: 1px solid #333; color: #fff; padding: 8px; width: 90%; margin-top: 10px; }
+        .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 11px; pointer-events: none; }
+        input { background: #111; border: 1px solid #333; color: #fff; padding: 8px; width: 90%; margin-top: 10px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -30,31 +35,105 @@
         <div id="canvas"></div>
         <div id="side-panel">
             <h3 style="margin:0;">Settings</h3>
-            <p id="node-label" style="font-size:12px; color:#555;">Select node</p>
-            <label>Speed:</label>
+            <p id="node-label" style="font-size:12px; color:#555;">Select node to edit</p>
+            <label>Move Speed:</label>
             <input type="number" id="val-input" value="10" oninput="updateVal()">
+            <p style="font-size:11px; color:#444; margin-top:20px;">System: Online</p>
         </div>
     </div>
 
     <div id="play-preview">
         <div style="background:#ffcc00; color:#000; font-size:10px; padding:2px 5px; font-weight:bold;">LIVE PREVIEW</div>
-        <div id="player" style="width:20px; height:20px; background:#00ff88; position:absolute; bottom:10px; left:10px;"></div>
+        <div id="player"></div>
     </div>
 
     <script>
         let selectedNode = null;
         let isPlaying = false;
-        let playerX = 10;
+        let playerPos = 10;
         let gameLoop = null;
 
         function addNode(type) {
+            const canvas = document.getElementById('canvas');
             const node = document.createElement('div');
             node.className = 'node';
-            node.style.left = '50px'; node.style.top = '50px';
-            node.dataset.val = "10";
-            node.innerHTML = `<div class="node-header">${type}</div><div style="height:40px;"></div>`;
+            node.style.left = '50px'; 
+            node.style.top = '50px';
+            node.dataset.speed = "10"; // Default speed
             
-            node.onclick = () => {
+            node.innerHTML = `<div class="node-header">${type.toUpperCase()}</div><div style="height:40px;"></div>`;
+            
+            node.onclick = (e) => {
                 selectedNode = node;
-                document.getElementById('node-label').innerText = type + " Settings";
-                document.getElementById('val-input').value = node.dataset
+                document.getElementById('node-label').innerText = type + " Node Selected";
+                document.getElementById('val-input').value = node.dataset.speed;
+                // Highlight selection
+                document.querySelectorAll('.node').forEach(n => n.style.borderColor = '#00ff88');
+                node.style.borderColor = '#fff';
+            };
+
+            canvas.appendChild(node);
+            makeDraggable(node);
+        }
+
+        function updateVal() { 
+            if(selectedNode) {
+                selectedNode.dataset.speed = document.getElementById('val-input').value; 
+            }
+        }
+
+        // --- FIXED PLAY LOGIC ---
+        function togglePlay() {
+            const preview = document.getElementById('play-preview');
+            const player = document.getElementById('player');
+            
+            isPlaying = !isPlaying;
+            preview.style.display = isPlaying ? 'block' : 'none';
+
+            if (isPlaying) {
+                // Har 30ms mein position update hogi
+                gameLoop = setInterval(() => {
+                    // Check karo kya koi node screen par hai?
+                    const activeNodes = document.querySelectorAll('.node');
+                    let currentSpeed = 5; // Default speed agar koi node na ho
+
+                    if (activeNodes.length > 0) {
+                        // Pehle node ki speed uthao
+                        currentSpeed = parseInt(activeNodes[0].dataset.speed) / 5;
+                    }
+
+                    playerPos += currentSpeed;
+                    
+                    // Boundary check (Box wapas shuruat mein aa jaye)
+                    if (playerPos > 220) playerPos = 0;
+                    
+                    player.style.left = playerPos + "px";
+                }, 30);
+            } else {
+                // Game stop hone par sab reset
+                clearInterval(gameLoop);
+                playerPos = 10;
+                player.style.left = "10px";
+            }
+        }
+
+        function cloudSave() {
+            alert("Logic synced to Cloud Vault!");
+        }
+
+        function makeDraggable(el) {
+            let p1 = 0, p2 = 0, p3 = 0, p4 = 0;
+            el.onmousedown = (e) => {
+                p3 = e.clientX; p4 = e.clientY;
+                document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+                document.onmousemove = (e) => {
+                    p1 = p3 - e.clientX; p2 = p4 - e.clientY;
+                    p3 = e.clientX; p4 = e.clientY;
+                    el.style.top = (el.offsetTop - p2) + "px";
+                    el.style.left = (el.offsetLeft - p1) + "px";
+                };
+            };
+        }
+    </script>
+</body>
+</html>
