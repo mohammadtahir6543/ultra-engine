@@ -2,79 +2,36 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine | Final Editor Fix</title>
+    <title>Ultra Engine | Final Fix</title>
     <style>
         body { background: #050505; color: #00ff88; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-        
-        /* Navigation Bar */
         #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 1000; }
-        
         #workspace { display: flex; flex: 1; position: relative; }
-
-        /* The Nodes Area */
         #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; z-index: 1; }
-        
-        /* Lines (Taar) Layer */
-        #svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        .line { stroke: #00ff88; stroke-width: 3; fill: none; filter: drop-shadow(0 0 5px #00ff88); }
-
-        /* Properties Panel */
-        #side-panel { width: 260px; background: #0a0a0a; border-left: 2px solid #222; padding: 20px; z-index: 100; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
-
-        /* Node Design */
-        .node { width: 150px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 10; cursor: move; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .node-header { background: #00ff88; color: #000; padding: 6px; font-weight: bold; text-align: center; font-size: 13px; border-top-left-radius: 5px; border-top-right-radius: 5px; }
-        
-        /* Connection Points */
-        .port { width: 12px; height: 12px; background: #00ff88; border-radius: 50%; position: absolute; border: 2px solid #000; z-index: 20; }
-        .port-in { left: -8px; top: 45px; }
-        .port-out { right: -8px; top: 45px; cursor: crosshair; }
-
-        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px; }
-        .btn:hover { background: #00ff88; color: #000; }
-        
-        input { background: #111; border: 1px solid #333; color: #00ff88; padding: 10px; width: 90%; margin-top: 10px; border-radius: 5px; font-size: 16px; }
+        #side-panel { width: 260px; background: #0a0a0a; border-left: 2px solid #222; padding: 20px; z-index: 100; }
+        .node { width: 150px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 10; cursor: move; }
+        .node-header { background: #00ff88; color: #000; padding: 6px; font-weight: bold; text-align: center; font-size: 13px; border-radius: 5px 5px 0 0; }
+        .port { width: 12px; height: 12px; background: #00ff88; border-radius: 50%; position: absolute; border: 2px solid #000; }
+        .port-in { left: -8px; top: 40px; }
+        .port-out { right: -8px; top: 40px; }
+        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        input { background: #111; border: 1px solid #333; color: #00ff88; padding: 10px; width: 90%; margin-top: 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <div id="nav">
-    <strong style="font-size: 18px;">🌀 ULTRA EDITOR</strong>
-    <button class="btn" onclick="createNode('Start')">+ Start Node</button>
-    <button class="btn" onclick="createNode('Move')">+ Move Node</button>
-    <button class="btn" onclick="createNode('Jump')">+ Jump Node</button>
-    <button class="btn" style="background:#00ff88; color:#000; margin-left:auto;" onclick="saveEngineData()">Save to Cloud</button>
+    <strong>🌀 ULTRA EDITOR</strong>
+    <button class="btn" onclick="addNode('Start')">+ Start</button>
+    <button class="btn" onclick="addNode('Move')">+ Move</button>
+    <button class="btn" onclick="addNode('Jump')">+ Jump</button>
+    <button class="btn" style="background:#00ff88; color:#000; margin-left:auto;" onclick="alert('Saving...')">Save Cloud</button>
 </div>
 
 <div id="workspace">
-    <div id="canvas">
-        <svg id="svg-canvas"></svg>
-        </div>
-
+    <div id="canvas" id="canvas-area"></div>
     <div id="side-panel">
-        <h3 style="margin-top:0; color:#fff;">Properties</h3>
-        <p id="node-info" style="color:#666; font-size: 13px;">Select a node to edit</p>
-        <hr border="1" color="#222">
-        <label style="font-size: 14px;">Logic Value (Speed/Power):</label>
-        <input type="number" id="prop-value" value="0" oninput="applyValue()">
-        <p style="font-size:11px; color:#444; margin-top:20px;">🛡️ Ultra Protection Active<br>☁️ No PC Storage Used</p>
-    </div>
-</div>
-
-<script>
-    let selectedNode = null;
-
-    function createNode(name) {
-        const canvas = document.getElementById('canvas');
-        const node = document.createElement('div');
-        node.className = 'node';
-        node.style.left = '50px';
-        node.style.top = '100px';
-        node.dataset.logicValue = "10"; // Default value
-
-        node.innerHTML = `
-            <div class="node-header">${name.toUpperCase()}</div>
-            <div style="height:60px; position:relative;">
-                <div class="port port-in"></div>
-                <div class="port port-out"></div>
-                <p style="color:#5
+        <h3 style="margin:0;">Properties</h3>
+        <p id="node-name" style="color:#666;">Select a node</p>
+        <label>Value:</label>
+        <input type="number" id="prop-val" value="0"
