@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultra Engine | Cloud Native</title>
     <style>
-        /* 1. BASIC SETTINGS */
         body { 
             background: #000; color: white; font-family: 'Segoe UI', sans-serif; 
             margin: 0; overflow: hidden; display: flex; align-items: center; 
             justify-content: center; height: 100vh; 
         }
 
-        /* 2. INTRO ANIMATION (ULTRA chamkega) */
+        /* Intro Screen */
         #intro { 
             position: fixed; width: 100%; height: 100%; background: #000; 
             display: flex; align-items: center; justify-content: center; 
@@ -23,7 +22,7 @@
             letter-spacing: 20px; animation: pulse 2s infinite; 
         }
 
-        /* 3. CLICK TO START SCREEN */
+        /* Start Screen */
         #start-screen { 
             display: none; text-align: center; z-index: 50; cursor: pointer; 
         }
@@ -32,7 +31,7 @@
             letter-spacing: 5px; animation: blink 1.5s infinite; 
         }
 
-        /* 4. DASHBOARD (OPTIONS) */
+        /* Dashboard */
         #dashboard { 
             display: none; text-align: center; width: 90%; max-width: 900px; opacity: 0; transition: 1s; 
         }
@@ -49,14 +48,12 @@
         }
         .btn-outline { background: transparent; border: 1px solid #00ff88; color: #00ff88; }
 
-        /* ANIMATIONS */
         @keyframes pulse { 
             from { opacity: 0.2; text-shadow: 0 0 10px #00ff88; } 
             to { opacity: 1; text-shadow: 0 0 50px #00ff88; } 
         }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
 
-        /* EYE COMFORT FILTER (Protection) */
         .eye-safe-layer { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             pointer-events: none; background: rgba(255, 150, 0, 0.03); z-index: 1000; 
@@ -64,12 +61,9 @@
     </style>
 </head>
 <body>
-
     <div class="eye-safe-layer"></div>
 
-    <div id="intro">
-        <div class="glow-text">ULTRA</div>
-    </div>
+    <div id="intro"><div class="glow-text">ULTRA</div></div>
 
     <div id="start-screen" onclick="showDashboard()">
         <h1 style="color:#00ff88; font-size: 60px; margin: 0;">ULTRA ENGINE</h1>
@@ -78,26 +72,20 @@
 
     <div id="dashboard">
         <h2 style="color:#fff;">WELCOME TO THE WORKSPACE</h2>
-        <p style="color:#666;">Zero Storage Engine | Cloud Sync Enabled</p>
-        
         <div class="box-container">
             <div class="card">
                 <h3>Native Apps</h3>
-                <p style="font-size: 13px; color: #888;">Install on PC/Mobile for offline work.</p>
-                <button class="btn" onclick="alert('Downloading PC Installer...')">Download for PC</button>
-                <button class="btn" onclick="alert('Downloading Android APK...')">Download for Mobile</button>
+                <button class="btn" onclick="alert('Downloading PC Version...')">Download for PC</button>
+                <button class="btn" onclick="alert('Downloading Mobile APK...')">Download for Mobile</button>
             </div>
-
             <div class="card">
                 <h3>Web Editor</h3>
-                <p style="font-size: 13px; color: #888;">Bina download kiye browser mein kaam karein.</p>
                 <button class="btn btn-outline" onclick="window.location.href='editor.html'">Run Online</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Intro khatam hone ka wait karein
         setTimeout(() => {
             document.getElementById('intro').style.opacity = '0';
             setTimeout(() => {
@@ -106,7 +94,6 @@
             }, 1000);
         }, 3000);
 
-        // Click karne par dashboard dikhayein
         function showDashboard() {
             document.getElementById('start-screen').style.display = 'none';
             const dash = document.getElementById('dashboard');
