@@ -2,35 +2,18 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine Pro | All-In-One</title>
+    <title>Ultra Engine Pro | Functional Version</title>
     <style>
         body { background: #050505; color: #00ff88; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-        
-        /* 1. TOP NAV */
         #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 1000; }
         .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
         .btn:hover { background: #00ff88; color: #000; }
-        .play-btn { background: #ffcc00 !important; color: #000 !important; }
-
-        /* 2. WORKSPACE */
         #workspace { display: flex; flex: 1; position: relative; }
         #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; }
-        
-        /* SVG Layer for Lines */
-        #svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        .wire { stroke: #00ff88; stroke-width: 3; fill: none; filter: drop-shadow(0 0 5px #00ff88); }
-
-        /* 3. PANELS */
         #side-panel { width: 250px; background: #0a0a0a; border-left: 2px solid #222; padding: 20px; z-index: 100; }
-        #play-preview { position: fixed; bottom: 20px; right: 270px; width: 250px; height: 150px; background: #000; border: 2px solid #ffcc00; display: none; z-index: 500; border-radius: 10px; }
-
-        /* 4. NODES */
+        #play-preview { position: fixed; bottom: 20px; right: 270px; width: 250px; height: 150px; background: #000; border: 2px solid #ffcc00; display: none; z-index: 500; border-radius: 10px; overflow: hidden; }
         .node { width: 140px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 10; cursor: move; }
-        .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 11px; border-radius: 5px 5px 0 0; }
-        .port { width: 12px; height: 12px; background: #00ff88; border: 2px solid #000; border-radius: 50%; position: absolute; cursor: crosshair; }
-        .port-in { left: -8px; top: 35px; }
-        .port-out { right: -8px; top: 35px; }
-
+        .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 11px; }
         input { background: #111; border: 1px solid #333; color: #fff; padding: 8px; width: 90%; margin-top: 10px; }
     </style>
 </head>
@@ -38,23 +21,18 @@
 
     <div id="nav">
         <strong>🌀 ULTRA PRO</strong>
-        <button class="btn" onclick="addNode('Start')">+ Start</button>
-        <button class="btn" onclick="addNode('Move')">+ Move</button>
-        <button class="play-btn btn" onclick="togglePlay()">▶ PLAY</button>
+        <button class="btn" onclick="addNode('Move')">+ Move Node</button>
+        <button class="btn" style="background:#ffcc00; color:#000;" onclick="togglePlay()">▶ PLAY</button>
         <button class="btn" style="margin-left:auto; background:#00ff88; color:#000;" onclick="cloudSave()">☁️ CLOUD SAVE</button>
     </div>
 
     <div id="workspace">
-        <div id="canvas">
-            <svg id="svg-canvas"></svg>
-        </div>
+        <div id="canvas"></div>
         <div id="side-panel">
             <h3 style="margin:0;">Settings</h3>
             <p id="node-label" style="font-size:12px; color:#555;">Select node</p>
-            <label>Value:</label>
-            <input type="number" id="val-input" oninput="updateVal()">
-            <hr border="1" color="#222" style="margin:20px 0;">
-            <p style="font-size:11px; color:#444;">Storage: 0.00 KB (Cloud Only)</p>
+            <label>Speed:</label>
+            <input type="number" id="val-input" value="10" oninput="updateVal()">
         </div>
     </div>
 
@@ -65,83 +43,18 @@
 
     <script>
         let selectedNode = null;
-        let connections = [];
-        let activeLine = null;
+        let isPlaying = false;
+        let playerX = 10;
+        let gameLoop = null;
 
-        // 1. NODE CREATION
         function addNode(type) {
             const node = document.createElement('div');
             node.className = 'node';
             node.style.left = '50px'; node.style.top = '50px';
             node.dataset.val = "10";
-            node.innerHTML = `
-                <div class="node-header">${type}</div>
-                <div style="height:50px;">
-                    <div class="port port-in"></div>
-                    <div class="port port-out" onmousedown="startWire(event)"></div>
-                </div>`;
+            node.innerHTML = `<div class="node-header">${type}</div><div style="height:40px;"></div>`;
             
             node.onclick = () => {
                 selectedNode = node;
                 document.getElementById('node-label').innerText = type + " Settings";
-                document.getElementById('val-input').value = node.dataset.val;
-            };
-            document.getElementById('canvas').appendChild(node);
-            makeDraggable(node);
-        }
-
-        // 2. WIRE SYSTEM (Option 1)
-        function startWire(e) {
-            e.stopPropagation();
-            const startPort = e.target;
-            const rect = startPort.getBoundingClientRect();
-            activeLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            activeLine.setAttribute("class", "wire");
-            document.getElementById('svg-canvas').appendChild(activeLine);
-
-            document.onmousemove = (moveE) => {
-                const canvasRect = document.getElementById('canvas').getBoundingClientRect();
-                activeLine.setAttribute("x1", rect.left - canvasRect.left + 6);
-                activeLine.setAttribute("y1", rect.top - canvasRect.top + 6);
-                activeLine.setAttribute("x2", moveE.clientX - canvasRect.left);
-                activeLine.setAttribute("y2", moveE.clientY - canvasRect.top);
-            };
-
-            document.onmouseup = () => {
-                document.onmousemove = null;
-                activeLine.remove(); // Just for visual demo now
-                activeLine = null;
-            };
-        }
-
-        // 3. PLAY MODE (Option 2)
-        function togglePlay() {
-            const preview = document.getElementById('play-preview');
-            preview.style.display = (preview.style.display === 'block') ? 'none' : 'block';
-            if(preview.style.display === 'block') alert("Logic running from Nodes...");
-        }
-
-        // 4. CLOUD SAVE (Option 3)
-        function cloudSave() {
-            alert("Success! Game logic encrypted and sent to your Google Vault (Email). Local Disk: 0% used.");
-        }
-
-        function updateVal() { if(selectedNode) selectedNode.dataset.val = document.getElementById('val-input').value; }
-
-        function makeDraggable(el) {
-            let p1 = 0, p2 = 0, p3 = 0, p4 = 0;
-            el.onmousedown = (e) => {
-                if(e.target.classList.contains('port')) return;
-                p3 = e.clientX; p4 = e.clientY;
-                document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
-                document.onmousemove = (e) => {
-                    p1 = p3 - e.clientX; p2 = p4 - e.clientY;
-                    p3 = e.clientX; p4 = e.clientY;
-                    el.style.top = (el.offsetTop - p2) + "px";
-                    el.style.left = (el.offsetLeft - p1) + "px";
-                };
-            };
-        }
-    </script>
-</body>
-</html>
+                document.getElementById('val-input').value = node.dataset
