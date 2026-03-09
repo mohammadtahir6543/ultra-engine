@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Ultra Engine | Cloud Editor</title>
+    <style>
+        body { background: #0a0a0a; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; }
+        
+        /* Top Bar */
+        #toolbar { height: 50px; background: #111; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 20px; gap: 20px; }
+        
+        /* Node Area */
+        #canvas { width: 100vw; height: calc(100vh - 50px); background-image: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; }
+        
+        /* Node Style */
+        .node {
+            position: absolute; width: 150px; background: #1a1a1a; border: 2px solid #00ff88;
+            border-radius: 8px; padding: 10px; cursor: move; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            user-select: none;
+        }
+        .node-header { font-weight: bold; border-bottom: 1px solid #333; margin-bottom: 5px; padding-bottom: 5px; font-size: 12px; }
+        .node-port { width: 10px; height: 10px; background: #00ff88; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        
+        .btn-save { background: #00ff88; color: #000; border: none; padding: 5px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .eye-status { font-size: 12px; color: #888; margin-left: auto; }
+    </style>
+</head>
+<body>
+
+    <div id="toolbar">
+        <strong>🌀 ULTRA EDITOR</strong>
+        <button class="btn-save" onclick="addNode('Move')">+ Add Move Node</button>
+        <button class="btn-save" onclick="addNode('Jump')">+ Add Jump Node</button>
+        <button class="btn-save" style="background:#555; color:white;" onclick="alert('Saving to your Email Cloud...')">Save to Cloud</button>
+        <div class="eye-status">🛡️ Eye-Comfort: Active</div>
+    </div>
+
+    <div id="canvas" id="canvas">
+        </div>
+
+    <script>
+        function addNode(type) {
+            const canvas = document.getElementById('canvas');
+            const node = document.createElement('div');
+            node.className = 'node';
+            node.style.left = '100px';
+            node.style.top = '100px';
+            
+            node.innerHTML = `
+                <div class="node-header">${type.toUpperCase()} NODE</div>
+                <div style="font-size: 10px; color: #888;">
+                    <span class="node-port"></span> Input<br>
+                    <span class="node-port" style="float:right"></span> Output
+                </div>
+            `;
+            
+            canvas.appendChild(node);
+            makeDraggable(node);
+        }
+
+        function makeDraggable(el) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            el.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                el.style.top = (el.offsetTop - pos2) + "px";
+                el.style.left = (el.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+    </script>
+</body>
+</html>
