@@ -2,168 +2,148 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine | Fixed Store</title>
+    <title>Ultra Engine | Reality Edition</title>
     <style>
-        body { background: #000; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        :root { --neon: #00ff88; --cpp-blue: #0088ff; }
+        body { background: #020202; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
-        /* Intro & Start Screens */
-        #intro { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-        #start-screen { position: fixed; inset: 0; background: #050505; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; cursor: pointer; }
-        .ultra-text { font-size: 80px; font-weight: bold; letter-spacing: 20px; animation: glow 2s infinite alternate; }
+        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid var(--neon); gap: 15px; }
+        #workspace { display: flex; flex: 1; height: calc(100vh - 60px); }
         
-        /* Layout */
-        #editor-ui { display: none; flex-direction: column; height: 100vh; width: 100vw; }
-        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; }
-        
-        #workspace { display: flex; flex: 1; width: 100%; position: relative; overflow: hidden; }
-        
-        /* Canvas (Center) */
-        #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; }
-        
-        /* ASSET STORE PANEL (Right) */
-        #store-panel { 
-            width: 280px; 
-            background: #0a0a0a; 
-            border-left: 3px solid #222; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 15px;
-            z-index: 100;
-        }
+        /* Realistic Canvas */
+        #canvas { flex: 1; background: #050505; position: relative; overflow: hidden; }
+        #world-map { position: absolute; width: 2000px; height: 2000px; background-image: 
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 100px 100px; }
 
-        /* Asset Grid */
-        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .asset-card { background: #151515; border: 1px solid #333; padding: 8px; border-radius: 8px; text-align: center; cursor: pointer; }
-        .asset-card:hover { border-color: #00ff88; transform: translateY(-2px); }
-        .asset-img { width: 100%; height: 70px; object-fit: contain; background: #000; border-radius: 4px; }
+        /* Mega Asset Store */
+        #store { width: 350px; background: #0a0a0a; border-left: 2px solid #222; overflow-y: auto; padding: 15px; }
+        .category-title { color: var(--neon); font-size: 14px; text-transform: uppercase; margin: 20px 0 10px; border-left: 3px solid var(--neon); padding-left: 10px; }
+        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .asset-item { background: #151515; border: 1px solid #333; border-radius: 6px; cursor: pointer; transition: 0.3s; padding: 5px; }
+        .asset-item:hover { border-color: var(--neon); transform: scale(1.05); }
+        .asset-img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; }
 
-        /* Nodes & Preview */
-        .node { width: 140px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 50; }
-        .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 11px; }
-        
-        #play-preview { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 450px; height: 220px; background: #000; border: 3px solid #ffcc00; display: none; z-index: 1000; border-radius: 12px; overflow: hidden; background-size: cover; }
-        #player { width: 50px; height: 50px; position: absolute; bottom: 20px; left: 10px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+        /* Preview Window */
+        #play-preview { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 800px; height: 400px; background: #000; border: 2px solid var(--neon); display: none; z-index: 1000; box-shadow: 0 0 50px rgba(0,255,136,0.2); }
+        #game-world { position: relative; width: 100%; height: 100%; background-size: cover; }
+        #player { width: 70px; height: 70px; position: absolute; bottom: 50px; left: 50px; background-size: contain; background-repeat: no-repeat; z-index: 10; transition: 0.1s; }
+        .placed-asset { position: absolute; background-size: contain; background-repeat: no-repeat; }
 
-        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        @keyframes glow { from { text-shadow: 0 0 10px #00ff88; opacity: 0.5; } to { text-shadow: 0 0 40px #00ff88; opacity: 1; } }
+        .btn { background: #222; color: var(--neon); border: 1px solid var(--neon); padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .btn-cpp { border-color: var(--cpp-blue); color: var(--cpp-blue); }
     </style>
 </head>
 <body>
 
-    <div id="intro"><div class="ultra-text">ULTRA</div></div>
-
-    <div id="start-screen" onclick="launchEditor()">
-        <h1 style="color:#00ff88; font-size: 50px;">ULTRA ENGINE</h1>
-        <p style="color:#666; letter-spacing: 5px;">CLICK TO START PROJECT</p>
+    <div id="nav">
+        <strong>🌀 ULTRA REALITY</strong>
+        <button class="btn" onclick="addNode('Logic')">+ Logic</button>
+        <button class="btn btn-cpp" onclick="addNode('C++ Engine')">+ C++</button>
+        <button class="btn" style="background:var(--neon); color:black;" onclick="runGame()">▶ LAUNCH REALM</button>
     </div>
 
-    <div id="editor-ui">
-        <div id="nav">
-            <strong>🌀 ULTRA PRO</strong>
-            <button class="btn" onclick="spawnNode('Move')">+ Move Node</button>
-            <button class="btn" style="background:#ffcc00; color:#000;" onclick="togglePlay()">▶ PLAY GAME</button>
-            <button class="btn" style="margin-left:auto;" onclick="alert('Syncing to Cloud...')">☁️ SAVE</button>
+    <div id="workspace">
+        <div id="canvas">
+            <div id="world-map"></div>
         </div>
-
-        <div id="workspace">
-            <div id="canvas"></div>
+        
+        <div id="store">
+            <h2 style="margin:0; font-size:18px;">REALITY ASSETS</h2>
             
-            <div id="store-panel">
-                <h3 style="margin:0; color:#00ff88; border-bottom: 1px solid #222; padding-bottom: 10px;">ASSET STORE</h3>
-                <p style="font-size: 11px; color:#555; margin: 10px 0;">Unity Style - 100% Free</p>
-                
-                <div class="asset-grid">
-                    <div class="asset-card" onclick="setHero('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png')">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" class="asset-img">
-                        <div style="font-size:10px; margin-top:5px;">Pikachu</div>
-                    </div>
-                    <div class="asset-card" onclick="setHero('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png')">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png" class="asset-img">
-                        <div style="font-size:10px; margin-top:5px;">Charmander</div>
-                    </div>
-                    <div class="asset-card" onclick="setBG('https://img.freepik.com/free-vector/nature-scene-with-forest-landscape-background_1308-51834.jpg')">
-                        <img src="https://img.freepik.com/free-vector/nature-scene-with-forest-landscape-background_1308-51834.jpg" class="asset-img">
-                        <div style="font-size:10px; margin-top:5px;">Forest BG</div>
-                    </div>
-                    <div class="asset-card" onclick="setBG('https://static.vecteezy.com/system/resources/thumbnails/000/271/573/small/vector-desert-landscape-illustration.jpg')">
-                        <img src="https://static.vecteezy.com/system/resources/thumbnails/000/271/573/small/vector-desert-landscape-illustration.jpg" class="asset-img">
-                        <div style="font-size:10px; margin-top:5px;">Desert BG</div>
-                    </div>
+            <div class="category-title">Infrastructure (Buildings/Airport)</div>
+            <div class="asset-grid">
+                <div class="asset-item" onclick="setWorld('https://images.unsplash.com/photo-1542296332-2b4473faf563?auto=format&fit=crop&w=600')">
+                    <img src="https://images.unsplash.com/photo-1542296332-2b4473faf563?auto=format&fit=crop&w=600" class="asset-img">
+                    <div style="font-size:10px;">Airport Terminal</div>
+                </div>
+                <div class="asset-item" onclick="setWorld('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=600')">
+                    <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=600" class="asset-img">
+                    <div style="font-size:10px;">Cyber City Map</div>
+                </div>
+            </div>
+
+            <div class="category-title">Vehicles & Aircraft</div>
+            <div class="asset-grid">
+                <div class="asset-item" onclick="spawnInGame('https://cdn-icons-png.flaticon.com/512/744/744465.png', 120)">
+                    <img src="https://cdn-icons-png.flaticon.com/512/744/744465.png" class="asset-img">
+                    <div style="font-size:10px;">Sport Car</div>
+                </div>
+                <div class="asset-item" onclick="spawnInGame('https://cdn-icons-png.flaticon.com/512/619/619104.png', 180)">
+                    <img src="https://cdn-icons-png.flaticon.com/512/619/619104.png" class="asset-img">
+                    <div style="font-size:10px;">Aeroplane</div>
+                </div>
+            </div>
+
+            <div class="category-title">Weapons & Hero</div>
+            <div class="asset-grid">
+                <div class="asset-item" onclick="setPlayer('https://cdn-icons-png.flaticon.com/512/3501/3501047.png')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3501/3501047.png" class="asset-img">
+                    <div style="font-size:10px;">Tactical Soldier</div>
+                </div>
+                <div class="asset-item" onclick="alert('Gun Logic Enabled in C++')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3233/3233514.png" class="asset-img">
+                    <div style="font-size:10px;">Assault Rifle</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="play-preview">
-        <div id="player"></div>
+        <div id="game-world">
+            <div id="player"></div>
+        </div>
+        <button onclick="runGame()" style="position:absolute; top:10px; right:10px; background:red; color:white; border:none; cursor:pointer;">ESC</button>
     </div>
 
     <script>
-        let isPlaying = false;
-        let playerX = 10;
-        let loop = null;
-
-        // Intro
-        setTimeout(() => {
-            document.getElementById('intro').style.display = 'none';
-            document.getElementById('start-screen').style.display = 'flex';
-        }, 2000);
-
-        function launchEditor() {
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('editor-ui').style.display = 'flex';
+        let isRunning = false;
+        
+        function setWorld(url) {
+            document.getElementById('game-world').style.backgroundImage = `url(${url})`;
+            alert("Realistic Map Loaded!");
         }
 
-        // Asset Logic
-        function setHero(url) {
-            const p = document.getElementById('player');
-            p.style.backgroundImage = `url(${url})`;
-            p.style.backgroundColor = "transparent";
-            alert("Character Ready!");
+        function setPlayer(url) {
+            document.getElementById('player').style.backgroundImage = `url(${url})`;
+            alert("Hero Dispatched!");
         }
 
-        function setBG(url) {
-            document.getElementById('play-preview').style.backgroundImage = `url(${url})`;
-            alert("World Theme Applied!");
+        function spawnInGame(url, size) {
+            const world = document.getElementById('game-world');
+            const item = document.createElement('div');
+            item.className = 'placed-asset';
+            item.style.width = size + "px";
+            item.style.height = (size/2) + "px";
+            item.style.backgroundImage = `url(${url})`;
+            item.style.top = Math.random() * 200 + "px";
+            item.style.left = Math.random() * 300 + "px";
+            world.appendChild(item);
+            alert("Vehicle Spawned!");
         }
 
-        function spawnNode(type) {
+        function addNode(name) {
             const n = document.createElement('div');
-            n.className = 'node';
-            n.style.left = '100px'; n.style.top = '100px';
-            n.innerHTML = `<div class="node-header">${type}</div><div style="height:40px;"></div>`;
+            n.style = `width:150px; background:#111; border:2px solid ${name.includes('C++')?'#0088ff':'#00ff88'}; position:absolute; left:100px; top:100px; padding:10px; border-radius:5px; font-size:12px; cursor:move; z-index:100;`;
+            n.innerHTML = `<strong>${name}</strong><br><span style="color:#555">Processing...</span>`;
             document.getElementById('canvas').appendChild(n);
-            makeDraggable(n);
-        }
-
-        function togglePlay() {
-            const preview = document.getElementById('play-preview');
-            isPlaying = !isPlaying;
-            preview.style.display = isPlaying ? 'block' : 'none';
-            if(isPlaying) {
-                loop = setInterval(() => {
-                    playerX += 6;
-                    if(playerX > 400) playerX = 0;
-                    document.getElementById('player').style.left = playerX + "px";
-                }, 30);
-            } else {
-                clearInterval(loop);
-                playerX = 10;
-            }
-        }
-
-        function makeDraggable(el) {
-            let p1=0, p2=0, p3=0, p4=0;
-            el.onmousedown = (e) => {
-                p3 = e.clientX; p4 = e.clientY;
-                document.onmouseup = () => { document.onmouseup=null; document.onmousemove=null; };
+            // Drag logic simple
+            n.onmousedown = (e) => {
+                let shiftX = e.clientX - n.getBoundingClientRect().left;
+                let shiftY = e.clientY - n.getBoundingClientRect().top;
                 document.onmousemove = (e) => {
-                    p1 = p3 - e.clientX; p2 = p4 - e.clientY;
-                    p3 = e.clientX; p4 = e.clientY;
-                    el.style.top = (el.offsetTop - p2) + "px";
-                    el.style.left = (el.offsetLeft - p1) + "px";
+                    n.style.left = e.clientX - shiftX + 'px';
+                    n.style.top = e.clientY - shiftY + 'px';
                 };
-            }
+                n.onmouseup = () => document.onmousemove = null;
+            };
+        }
+
+        function runGame() {
+            const p = document.getElementById('play-preview');
+            isRunning = !isRunning;
+            p.style.display = isRunning ? 'block' : 'none';
         }
     </script>
 </body>
