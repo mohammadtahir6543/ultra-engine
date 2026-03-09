@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <div id="g_id_onload"
+     data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+     data-callback="handleCredentialResponse">
+</div>
+<div class="g_id_signin" data-type="standard"></div>
+
+<script>
+  function handleCredentialResponse(response) {
+     console.log("User Logged In! Token: " + response.credential);
+     alert("Cloud Vault Connected to your Email!");
+  }
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultra Engine | Cloud Native</title>
