@@ -87,3 +87,10 @@
     </script>
 </body>
 </html>
+// Touch support for Mobile
+elmnt.ontouchstart = dragMouseDown;
+function dragMouseDown(e) {
+    let clientX = e.clientX || e.touches[0].clientX;
+    let clientY = e.clientY || e.touches[0].clientY;
+    // ... baki logic same rahega
+}
