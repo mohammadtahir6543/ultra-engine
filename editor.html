@@ -2,148 +2,137 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine | Reality Edition</title>
+    <title>Ultra Engine | Realistic Combat</title>
     <style>
-        :root { --neon: #00ff88; --cpp-blue: #0088ff; }
-        body { background: #020202; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        :root { --neon: #00ff88; --cpp: #0088ff; }
+        body { background: #000; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
         
         #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid var(--neon); gap: 15px; }
-        #workspace { display: flex; flex: 1; height: calc(100vh - 60px); }
-        
-        /* Realistic Canvas */
-        #canvas { flex: 1; background: #050505; position: relative; overflow: hidden; }
-        #world-map { position: absolute; width: 2000px; height: 2000px; background-image: 
-            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 100px 100px; }
+        #workspace { display: flex; height: calc(100vh - 60px); }
+        #canvas { flex: 1; background: #080808; position: relative; overflow: hidden; }
 
-        /* Mega Asset Store */
-        #store { width: 350px; background: #0a0a0a; border-left: 2px solid #222; overflow-y: auto; padding: 15px; }
-        .category-title { color: var(--neon); font-size: 14px; text-transform: uppercase; margin: 20px 0 10px; border-left: 3px solid var(--neon); padding-left: 10px; }
+        /* Mega Store */
+        #store { width: 320px; background: #0a0a0a; border-left: 2px solid #222; overflow-y: auto; padding: 15px; }
+        .category { color: var(--neon); font-size: 12px; font-weight: bold; margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 1px; }
         .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .asset-item { background: #151515; border: 1px solid #333; border-radius: 6px; cursor: pointer; transition: 0.3s; padding: 5px; }
-        .asset-item:hover { border-color: var(--neon); transform: scale(1.05); }
-        .asset-img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; }
+        .asset-card { background: #151515; border: 1px solid #333; padding: 5px; border-radius: 6px; cursor: pointer; text-align: center; }
+        .asset-card:hover { border-color: var(--neon); transform: scale(1.02); }
+        .asset-img { width: 100%; height: 70px; object-fit: cover; border-radius: 4px; }
 
-        /* Preview Window */
-        #play-preview { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 800px; height: 400px; background: #000; border: 2px solid var(--neon); display: none; z-index: 1000; box-shadow: 0 0 50px rgba(0,255,136,0.2); }
-        #game-world { position: relative; width: 100%; height: 100%; background-size: cover; }
-        #player { width: 70px; height: 70px; position: absolute; bottom: 50px; left: 50px; background-size: contain; background-repeat: no-repeat; z-index: 10; transition: 0.1s; }
-        .placed-asset { position: absolute; background-size: contain; background-repeat: no-repeat; }
-
-        .btn { background: #222; color: var(--neon); border: 1px solid var(--neon); padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        .btn-cpp { border-color: var(--cpp-blue); color: var(--cpp-blue); }
+        /* REALISTIC PLAY WINDOW */
+        #play-preview { position: fixed; inset: 0; background: #000; display: none; z-index: 10000; }
+        #game-map { width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; }
+        #player { width: 80px; height: 80px; position: absolute; bottom: 50%; left: 50%; background-size: contain; background-repeat: no-repeat; z-index: 50; transition: transform 0.1s; }
+        
+        .btn { background: #222; color: var(--neon); border: 1px solid var(--neon); padding: 8px 15px; cursor: pointer; font-weight: bold; }
+        .close-btn { position: absolute; top: 20px; right: 20px; background: red; color: white; padding: 10px; border: none; cursor: pointer; z-index: 10001; }
     </style>
 </head>
 <body>
 
     <div id="nav">
         <strong>🌀 ULTRA REALITY</strong>
-        <button class="btn" onclick="addNode('Logic')">+ Logic</button>
-        <button class="btn btn-cpp" onclick="addNode('C++ Engine')">+ C++</button>
-        <button class="btn" style="background:var(--neon); color:black;" onclick="runGame()">▶ LAUNCH REALM</button>
+        <button class="btn" onclick="addNode('Realistic Physics')">+ Physics</button>
+        <button class="btn" style="border-color:var(--cpp); color:var(--cpp);" onclick="addNode('C++ Gun Logic')">+ C++ Script</button>
+        <button class="btn" style="background:var(--neon); color:black;" onclick="toggleLaunch()">▶ LAUNCH GAME</button>
     </div>
 
     <div id="workspace">
-        <div id="canvas">
-            <div id="world-map"></div>
-        </div>
+        <div id="canvas"></div>
         
         <div id="store">
-            <h2 style="margin:0; font-size:18px;">REALITY ASSETS</h2>
+            <h3 style="margin:0;">ASSET VAULT</h3>
             
-            <div class="category-title">Infrastructure (Buildings/Airport)</div>
+            <div class="category">Realistic World (4K)</div>
             <div class="asset-grid">
-                <div class="asset-item" onclick="setWorld('https://images.unsplash.com/photo-1542296332-2b4473faf563?auto=format&fit=crop&w=600')">
-                    <img src="https://images.unsplash.com/photo-1542296332-2b4473faf563?auto=format&fit=crop&w=600" class="asset-img">
-                    <div style="font-size:10px;">Airport Terminal</div>
+                <div class="asset-card" onclick="setMap('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=1000')">
+                    <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=1000" class="asset-img">
+                    <span>City Highway</span>
                 </div>
-                <div class="asset-item" onclick="setWorld('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=600')">
-                    <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=600" class="asset-img">
-                    <div style="font-size:10px;">Cyber City Map</div>
+                <div class="asset-card" onclick="setMap('https://images.unsplash.com/photo-1531265726475-52ad60219627?q=80&w=1000')">
+                    <img src="https://images.unsplash.com/photo-1531265726475-52ad60219627?q=80&w=1000" class="asset-img">
+                    <span>Airport Hub</span>
                 </div>
             </div>
 
-            <div class="category-title">Vehicles & Aircraft</div>
+            <div class="category">Vehicles & Heavy</div>
             <div class="asset-grid">
-                <div class="asset-item" onclick="spawnInGame('https://cdn-icons-png.flaticon.com/512/744/744465.png', 120)">
+                <div class="asset-card" onclick="setHero('https://cdn-icons-png.flaticon.com/512/744/744465.png')">
                     <img src="https://cdn-icons-png.flaticon.com/512/744/744465.png" class="asset-img">
-                    <div style="font-size:10px;">Sport Car</div>
+                    <span>GT Sports Car</span>
                 </div>
-                <div class="asset-item" onclick="spawnInGame('https://cdn-icons-png.flaticon.com/512/619/619104.png', 180)">
+                <div class="asset-card" onclick="setHero('https://cdn-icons-png.flaticon.com/512/619/619104.png')">
                     <img src="https://cdn-icons-png.flaticon.com/512/619/619104.png" class="asset-img">
-                    <div style="font-size:10px;">Aeroplane</div>
+                    <span>Private Jet</span>
                 </div>
             </div>
 
-            <div class="category-title">Weapons & Hero</div>
+            <div class="category">Realistic Hero</div>
             <div class="asset-grid">
-                <div class="asset-item" onclick="setPlayer('https://cdn-icons-png.flaticon.com/512/3501/3501047.png')">
+                <div class="asset-card" onclick="setHero('https://cdn-icons-png.flaticon.com/512/3501/3501047.png')">
                     <img src="https://cdn-icons-png.flaticon.com/512/3501/3501047.png" class="asset-img">
-                    <div style="font-size:10px;">Tactical Soldier</div>
-                </div>
-                <div class="asset-item" onclick="alert('Gun Logic Enabled in C++')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3233/3233514.png" class="asset-img">
-                    <div style="font-size:10px;">Assault Rifle</div>
+                    <span>Soldier</span>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="play-preview">
-        <div id="game-world">
+        <button class="close-btn" onclick="toggleLaunch()">EXIT GAME</button>
+        <div id="game-map">
             <div id="player"></div>
         </div>
-        <button onclick="runGame()" style="position:absolute; top:10px; right:10px; background:red; color:white; border:none; cursor:pointer;">ESC</button>
     </div>
 
     <script>
-        let isRunning = false;
-        
-        function setWorld(url) {
-            document.getElementById('game-world').style.backgroundImage = `url(${url})`;
-            alert("Realistic Map Loaded!");
+        let isGameRunning = false;
+        let pX = 50, pY = 50;
+
+        function setMap(url) {
+            document.getElementById('game-map').style.backgroundImage = `url(${url})`;
+            alert("Realistic Map Synced!");
         }
 
-        function setPlayer(url) {
+        function setHero(url) {
             document.getElementById('player').style.backgroundImage = `url(${url})`;
-            alert("Hero Dispatched!");
+            alert("Asset Assigned to Player!");
         }
 
-        function spawnInGame(url, size) {
-            const world = document.getElementById('game-world');
-            const item = document.createElement('div');
-            item.className = 'placed-asset';
-            item.style.width = size + "px";
-            item.style.height = (size/2) + "px";
-            item.style.backgroundImage = `url(${url})`;
-            item.style.top = Math.random() * 200 + "px";
-            item.style.left = Math.random() * 300 + "px";
-            world.appendChild(item);
-            alert("Vehicle Spawned!");
+        function toggleLaunch() {
+            const screen = document.getElementById('play-preview');
+            isGameRunning = !isGameRunning;
+            screen.style.display = isGameRunning ? 'block' : 'none';
+            if(isGameRunning) alert("CONTROLS: Use W, A, S, D to Move");
         }
 
-        function addNode(name) {
+        // C++ style Movement Logic
+        window.addEventListener('keydown', (e) => {
+            if(!isGameRunning) return;
+            const p = document.getElementById('player');
+            let speed = 2;
+            if(e.key == 'w') pY -= speed;
+            if(e.key == 's') pY += speed;
+            if(e.key == 'a') { pX -= speed; p.style.transform = "scaleX(-1)"; }
+            if(e.key == 'd') { pX += speed; p.style.transform = "scaleX(1)"; }
+            
+            p.style.left = pX + "%";
+            p.style.top = pY + "%";
+        });
+
+        function addNode(txt) {
             const n = document.createElement('div');
-            n.style = `width:150px; background:#111; border:2px solid ${name.includes('C++')?'#0088ff':'#00ff88'}; position:absolute; left:100px; top:100px; padding:10px; border-radius:5px; font-size:12px; cursor:move; z-index:100;`;
-            n.innerHTML = `<strong>${name}</strong><br><span style="color:#555">Processing...</span>`;
+            n.style = "width:150px; background:#111; border:2px solid var(--neon); position:absolute; left:100px; top:100px; padding:10px; border-radius:8px; cursor:move; font-size:12px; z-index:1000;";
+            n.innerHTML = `<strong>${txt}</strong><br><span style="color:#666">Status: Active</span>`;
             document.getElementById('canvas').appendChild(n);
-            // Drag logic simple
+            
+            // Drag logic
             n.onmousedown = (e) => {
-                let shiftX = e.clientX - n.getBoundingClientRect().left;
-                let shiftY = e.clientY - n.getBoundingClientRect().top;
-                document.onmousemove = (e) => {
-                    n.style.left = e.clientX - shiftX + 'px';
-                    n.style.top = e.clientY - shiftY + 'px';
+                document.onmousemove = (ev) => {
+                    n.style.left = ev.clientX - 75 + 'px';
+                    n.style.top = ev.clientY - 30 + 'px';
                 };
-                n.onmouseup = () => document.onmousemove = null;
+                document.onmouseup = () => document.onmousemove = null;
             };
-        }
-
-        function runGame() {
-            const p = document.getElementById('play-preview');
-            isRunning = !isRunning;
-            p.style.display = isRunning ? 'block' : 'none';
         }
     </script>
 </body>
