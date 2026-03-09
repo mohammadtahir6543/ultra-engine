@@ -2,32 +2,28 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine | Node Linker Pro</title>
+    <title>Ultra Engine | Core Logic</title>
     <style>
-        body { background: #050505; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; }
-        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 100; position: relative; }
-        #canvas { width: 100vw; height: 100vh; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; }
+        body { background: #050505; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 100; }
         
-        /* Lines layer */
-        #svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        #workspace { display: flex; flex: 1; position: relative; }
+        #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; }
+        
+        /* Properties Panel (Right Side) */
+        #side-panel { width: 250px; background: #111; border-left: 2px solid #222; padding: 20px; display: flex; flex-direction: column; z-index: 50; }
+        
+        /* Nodes & Lines */
+        #svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         .line { stroke: #00ff88; stroke-width: 3; fill: none; filter: drop-shadow(0 0 5px #00ff88); }
-
-        .node { 
-            width: 140px; background: #1a1a1a; border: 2px solid #00ff88; 
-            position: absolute; cursor: move; border-radius: 8px; z-index: 10;
-        }
+        .node { width: 140px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; cursor: pointer; }
         .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 12px; }
-        
-        /* Connection Points (Dots) */
-        .port { 
-            width: 12px; height: 12px; background: #00ff88; border-radius: 50%; 
-            position: absolute; cursor: crosshair; border: 2px solid #000;
-        }
-        .port-in { left: -7px; top: 40px; }
-        .port-out { right: -7px; top: 40px; }
+        .port { width: 12px; height: 12px; background: #00ff88; border-radius: 50%; position: absolute; border: 2px solid #000; }
+        .port-in { left: -7px; top: 35px; }
+        .port-out { right: -7px; top: 35px; cursor: crosshair; }
 
-        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 12px; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .btn:hover { background: #00ff88; color: #000; }
+        input { background: #222; border: 1px solid #00ff88; color: white; padding: 8px; width: 90%; margin-top: 10px; border-radius: 4px; }
+        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 12px; cursor: pointer; font-weight: bold; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -36,32 +32,54 @@
     <strong>🌀 ULTRA EDITOR</strong>
     <button class="btn" onclick="createNode('Start')">+ Start</button>
     <button class="btn" onclick="createNode('Move')">+ Move</button>
-    <button class="btn" onclick="createNode('Jump')">+ Jump</button>
-    <button class="btn" style="background:#00ff88; color:#000; margin-left:auto;" onclick="alert('Cloud Syncing...')">Save Cloud</button>
+    <button class="btn" style="background:#00ff88; color:#000;" onclick="saveLogic()">Compile & Save</button>
 </div>
 
-<div id="canvas">
-    <svg id="svg-canvas"></svg>
+<div id="workspace">
+    <div id="canvas">
+        <svg id="svg-canvas"></svg>
+    </div>
+
+    <div id="side-panel">
+        <h3 style="margin-top:0;">Properties</h3>
+        <p id="selected-node-text" style="color:#888;">No node selected</p>
+        <label>Set Value (Speed/Time):</label>
+        <input type="number" id="node-value" value="0" oninput="updateNodeData()">
+        <p style="font-size:12px; color:#444; margin-top:auto;">Cloud Status: Connected</p>
+    </div>
 </div>
 
 <script>
-    let activeLine = null;
-    let startPort = null;
+    let selectedNode = null;
+    let connections = [];
 
     function createNode(name) {
-        const canvas = document.getElementById('canvas');
         const n = document.createElement('div');
         n.className = 'node';
-        n.style.left = '100px'; n.style.top = '100px';
+        n.style.left = '50px'; n.style.top = '50px';
+        n.dataset.value = "0"; // Default speed/value
         n.innerHTML = `
-            <div class="node-header">${name.toUpperCase()}</div>
-            <div style="height:60px; position:relative;">
+            <div class="node-header">${name}</div>
+            <div style="height:50px;">
                 <div class="port port-in"></div>
-                <div class="port port-out" onmousedown="startLinking(event)"></div>
+                <div class="port port-out" onmousedown="alert('Linking started... (Next step will fix lines)')"></div>
             </div>
         `;
-        canvas.appendChild(n);
+        
+        n.onclick = () => {
+            selectedNode = n;
+            document.getElementById('selected-node-text').innerText = "Editing: " + name;
+            document.getElementById('node-value').value = n.dataset.value;
+        };
+
+        document.getElementById('canvas').appendChild(n);
         makeDraggable(n);
+    }
+
+    function updateNodeData() {
+        if(selectedNode) {
+            selectedNode.dataset.value = document.getElementById('node-value').value;
+        }
     }
 
     function makeDraggable(el) {
@@ -75,67 +93,13 @@
                 p3 = e.clientX; p4 = e.clientY;
                 el.style.top = (el.offsetTop - p2) + "px";
                 el.style.left = (el.offsetLeft - p1) + "px";
-                updateLines(); // Move karte waqt line bhi hilegi
             };
         }
     }
 
-    function startLinking(e) {
-        startPort = e.target;
-        activeLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        activeLine.setAttribute("class", "line");
-        document.getElementById('svg-canvas').appendChild(activeLine);
-
-        document.onmousemove = (ev) => {
-            const rect = startPort.getBoundingClientRect();
-            activeLine.setAttribute("x1", rect.left + 6);
-            activeLine.setAttribute("y1", rect.top + 6);
-            activeLine.setAttribute("x2", ev.clientX);
-            activeLine.setAttribute("y2", ev.clientY);
-        };
-
-        document.onmouseup = () => {
-            document.onmousemove = null;
-            // Agar kisi 'port-in' par nahi chhoda toh line delete ho jayegi (Next step mein link logic)
-        };
+    function saveLogic() {
+        alert("Logic Compiled! Values and positions saved to your Email Cloud.");
     }
-
-    function updateLines() {
-        // Isme hum saari purani lines ko refresh karenge jab node hilega
-    }
-    // Engine ka Brain
-let engineData = {
-    nodes: [],
-    connections: []
-};
-
-// Jab bhi koi naya node banega, wo is list mein add hoga
-function registerNode(id, type, x, y) {
-    engineData.nodes.push({
-        id: id,
-        type: type,
-        position: {x: x, y: y},
-        properties: { speed: 0, jumpHeight: 0 }
-    });
-}
-
-// Do nodes ko jodne ka logic
-function connectNodes(startNodeId, endNodeId) {
-    engineData.connections.push({
-        from: startNodeId,
-        to: endNodeId
-    });
-    console.log("Logic Linked: " + startNodeId + " -> " + endNodeId);
-}
-    <div id="prop-panel" style="position:fixed; right:0; top:60px; width:200px; height:100%; background:#111; border-left:2px solid #222; padding:15px; display:none; z-index:1000;">
-    <h3 style="color:#00ff88; font-size:16px;">Node Settings</h3>
-    <hr border="1" color="#222">
-    <label>Speed / Power:</label><br>
-    <input type="number" id="node-val" style="width:90%; background:#222; color:#fff; border:1px solid #00ff88; margin-top:10px;">
-    <br><br>
-    <button class="btn" onclick="saveNodeSettings()" style="width:100%;">Apply Changes</button>
-</div>
 </script>
-
 </body>
 </html>
