@@ -1,96 +1,20 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <title>Ultra Editor | Node Connector</title>
-    <style>
-        body { background: #050505; color: #00ff88; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 15px; z-index: 100; }
-        #main-container { display: flex; flex: 1; position: relative; }
-        #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; }
-        
-        /* SVG layer for lines */
-        #svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        
-        .node { 
-            width: 140px; background: #1a1a1a; border: 1.5px solid #00ff88; 
-            position: absolute; cursor: move; border-radius: 8px; font-size: 13px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4); z-index: 10;
-        }
-        .node-title { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; }
-        .node-port { 
-            width: 12px; height: 12px; background: #00ff88; border-radius: 50%; 
-            display: block; margin: 10px auto; cursor: crosshair; pointer-events: auto;
-        }
-        .btn-add { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .btn-add:hover { background: #00ff88; color: #000; }
-    </style>
-</head>
-<body>
-    <div id="nav">
-        <strong>🌀 ULTRA EDITOR</strong>
-        <button class="btn-add" onclick="createNode('Start', '#00ff88')">Start Node</button>
-        <button class="btn-add" onclick="createNode('Move', '#ff9900')">Move Logic</button>
-        <button class="btn-add" style="background:#00ff88; color:#000;" onclick="alert('Saving Project to Cloud...')">Cloud Save</button>
-        <button class="btn-add" style="background:red; color:white;" onclick="window.location.href='index.html'">Exit</button>
-    </div>
-    
-    <div id="main-container">
-        <div id="canvas">
-            <svg id="svg-canvas">
-                </svg>
-        </div>
-    </div>
+<button class="btn-add" style="background:#ffcc00; color:#000;" onclick="togglePlay()">▶ PLAY GAME</button>
 
-    <script>
-        let nodes = [];
-        let connections = [];
+<div id="play-window" style="display:none; position:fixed; bottom:20px; right:20px; width:300px; height:200px; background:#000; border:2px solid #ffcc00; z-index:1000; border-radius:10px;">
+    <div style="background:#ffcc00; color:#000; padding:5px; font-size:12px; font-weight:bold;">PREVIEW MODE</div>
+    <div id="player-box" style="width:30px; height:30px; background:#00ff88; position:absolute; bottom:10px; left:10px;"></div>
+</div>
 
-        function createNode(type, color) {
-            const canvas = document.getElementById('canvas');
-            const n = document.createElement('div');
-            n.className = 'node';
-            n.style.borderColor = color;
-            n.style.left = '100px'; n.style.top = '100px';
-            
-            n.innerHTML = `
-                <div class="node-title" style="background:${color}">${type}</div>
-                <div style="padding:10px; text-align:center;">
-                    <div class="node-port" title="Connect"></div>
-                    <small>Logic Out</small>
-                </div>
-            `;
-            
-            canvas.appendChild(n);
-            dragElement(n);
+<script>
+    // Play Button Logic
+    function togglePlay() {
+        const win = document.getElementById('play-window');
+        const player = document.getElementById('player-box');
+        if(win.style.display === 'none') {
+            win.style.display = 'block';
+            alert("Game Logic Executing from Cloud Nodes...");
+        } else {
+            win.style.display = 'none';
         }
-
-        function dragElement(elmnt) {
-            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-            elmnt.onmousedown = dragMouseDown;
-            function dragMouseDown(e) {
-                if(e.target.className === 'node-port') return; // Port par drag nahi hoga
-                e.preventDefault();
-                pos3 = e.clientX; pos4 = e.clientY;
-                document.onmouseup = closeDragElement;
-                document.onmousemove = elementDrag;
-            }
-            function elementDrag(e) {
-                e.preventDefault();
-                pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
-                pos3 = e.clientX; pos4 = e.clientY;
-                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-            }
-            function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
-        }
-    </script>
-</body>
-</html>
-// Touch support for Mobile
-elmnt.ontouchstart = dragMouseDown;
-function dragMouseDown(e) {
-    let clientX = e.clientX || e.touches[0].clientX;
-    let clientY = e.clientY || e.touches[0].clientY;
-    // ... baki logic same rahega
-}
+    }
+</script>
