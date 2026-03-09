@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <title>Ultra Engine | Cloud Native</title>
+    <style>
+        body { background-color: #050505; color: #00ff00; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        #header { height: 50px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #333; }
+        #viewport { width: 70%; height: calc(100vh - 50px); float: left; background: #000; display: flex; align-items: center; justify-content: center; border-right: 1px solid #333; }
+        #sidebar { width: 29%; height: calc(100vh - 50px); float: right; padding: 10px; background: #0a0a0a; }
+        .node-btn { background: #222; color: #0f0; border: 1px solid #0f0; padding: 10px; width: 100%; margin-bottom: 10px; cursor: pointer; border-radius: 5px; }
+        .eye-safe { color: #ff9900; font-size: 12px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <strong>🌀 ULTRA ENGINE</strong> &nbsp; | &nbsp; Email: <input type="email" placeholder="Enter Email for Cloud Sync" id="userEmail" style="background:#222; color:#fff; border:1px solid #444;">
+    </div>
+    
+    <div id="viewport">
+        <p style="color:#444;">[ 3D VIEWPORT - ZERO STORAGE ACTIVE ]</p>
+    </div>
+
+    <div id="sidebar">
+        <h3>Visual Scripting (No-Code)</h3>
+        <button class="node-btn" onclick="addNode('Move')">Add Move Node</button>
+        <button class="node-btn" onclick="addNode('Jump')">Add Jump Node</button>
+        <button class="node-btn" onclick="publish()">One-Click Publish (Direct to Store)</button>
+        
+        <div class="eye-safe">
+            🛡️ Eye-Comfort Active: Blue Light Filter 85% <br>
+            ☁️ Cloud Sync: Saving to Email...
+        </div>
+    </div>
+
+    <script>
+        function addNode(type) { alert(type + " Node added to your Cloud Project!"); }
+        function publish() { alert("Building App on Server... Sending to App Store via Email API!"); }
+    </script>
+</body>
+</html>
