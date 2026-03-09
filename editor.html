@@ -127,6 +127,14 @@ function connectNodes(startNodeId, endNodeId) {
     });
     console.log("Logic Linked: " + startNodeId + " -> " + endNodeId);
 }
+    <div id="prop-panel" style="position:fixed; right:0; top:60px; width:200px; height:100%; background:#111; border-left:2px solid #222; padding:15px; display:none; z-index:1000;">
+    <h3 style="color:#00ff88; font-size:16px;">Node Settings</h3>
+    <hr border="1" color="#222">
+    <label>Speed / Power:</label><br>
+    <input type="number" id="node-val" style="width:90%; background:#222; color:#fff; border:1px solid #00ff88; margin-top:10px;">
+    <br><br>
+    <button class="btn" onclick="saveNodeSettings()" style="width:100%;">Apply Changes</button>
+</div>
 </script>
 
 </body>
