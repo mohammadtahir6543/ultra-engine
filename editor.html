@@ -1,20 +1,109 @@
-<button class="btn-add" style="background:#ffcc00; color:#000;" onclick="togglePlay()">▶ PLAY GAME</button>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Ultra Engine | Node Linker Pro</title>
+    <style>
+        body { background: #050505; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; }
+        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 100; position: relative; }
+        #canvas { width: 100vw; height: 100vh; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; }
+        
+        /* Lines layer */
+        #svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .line { stroke: #00ff88; stroke-width: 3; fill: none; filter: drop-shadow(0 0 5px #00ff88); }
 
-<div id="play-window" style="display:none; position:fixed; bottom:20px; right:20px; width:300px; height:200px; background:#000; border:2px solid #ffcc00; z-index:1000; border-radius:10px;">
-    <div style="background:#ffcc00; color:#000; padding:5px; font-size:12px; font-weight:bold;">PREVIEW MODE</div>
-    <div id="player-box" style="width:30px; height:30px; background:#00ff88; position:absolute; bottom:10px; left:10px;"></div>
+        .node { 
+            width: 140px; background: #1a1a1a; border: 2px solid #00ff88; 
+            position: absolute; cursor: move; border-radius: 8px; z-index: 10;
+        }
+        .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 12px; }
+        
+        /* Connection Points (Dots) */
+        .port { 
+            width: 12px; height: 12px; background: #00ff88; border-radius: 50%; 
+            position: absolute; cursor: crosshair; border: 2px solid #000;
+        }
+        .port-in { left: -7px; top: 40px; }
+        .port-out { right: -7px; top: 40px; }
+
+        .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 12px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .btn:hover { background: #00ff88; color: #000; }
+    </style>
+</head>
+<body>
+
+<div id="nav">
+    <strong>🌀 ULTRA EDITOR</strong>
+    <button class="btn" onclick="createNode('Start')">+ Start</button>
+    <button class="btn" onclick="createNode('Move')">+ Move</button>
+    <button class="btn" onclick="createNode('Jump')">+ Jump</button>
+    <button class="btn" style="background:#00ff88; color:#000; margin-left:auto;" onclick="alert('Cloud Syncing...')">Save Cloud</button>
+</div>
+
+<div id="canvas">
+    <svg id="svg-canvas"></svg>
 </div>
 
 <script>
-    // Play Button Logic
-    function togglePlay() {
-        const win = document.getElementById('play-window');
-        const player = document.getElementById('player-box');
-        if(win.style.display === 'none') {
-            win.style.display = 'block';
-            alert("Game Logic Executing from Cloud Nodes...");
-        } else {
-            win.style.display = 'none';
+    let activeLine = null;
+    let startPort = null;
+
+    function createNode(name) {
+        const canvas = document.getElementById('canvas');
+        const n = document.createElement('div');
+        n.className = 'node';
+        n.style.left = '100px'; n.style.top = '100px';
+        n.innerHTML = `
+            <div class="node-header">${name.toUpperCase()}</div>
+            <div style="height:60px; position:relative;">
+                <div class="port port-in"></div>
+                <div class="port port-out" onmousedown="startLinking(event)"></div>
+            </div>
+        `;
+        canvas.appendChild(n);
+        makeDraggable(n);
+    }
+
+    function makeDraggable(el) {
+        let p1 = 0, p2 = 0, p3 = 0, p4 = 0;
+        el.onmousedown = (e) => {
+            if(e.target.classList.contains('port')) return;
+            p3 = e.clientX; p4 = e.clientY;
+            document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+            document.onmousemove = (e) => {
+                p1 = p3 - e.clientX; p2 = p4 - e.clientY;
+                p3 = e.clientX; p4 = e.clientY;
+                el.style.top = (el.offsetTop - p2) + "px";
+                el.style.left = (el.offsetLeft - p1) + "px";
+                updateLines(); // Move karte waqt line bhi hilegi
+            };
         }
     }
+
+    function startLinking(e) {
+        startPort = e.target;
+        activeLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        activeLine.setAttribute("class", "line");
+        document.getElementById('svg-canvas').appendChild(activeLine);
+
+        document.onmousemove = (ev) => {
+            const rect = startPort.getBoundingClientRect();
+            activeLine.setAttribute("x1", rect.left + 6);
+            activeLine.setAttribute("y1", rect.top + 6);
+            activeLine.setAttribute("x2", ev.clientX);
+            activeLine.setAttribute("y2", ev.clientY);
+        };
+
+        document.onmouseup = () => {
+            document.onmousemove = null;
+            // Agar kisi 'port-in' par nahi chhoda toh line delete ho jayegi (Next step mein link logic)
+        };
+    }
+
+    function updateLines() {
+        // Isme hum saari purani lines ko refresh karenge jab node hilega
+    }
 </script>
+
+</body>
+</html>
