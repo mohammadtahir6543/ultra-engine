@@ -2,88 +2,72 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine | Cloud Editor</title>
+    <title>Ultra Editor | No-Code Workspace</title>
     <style>
-        body { background: #0a0a0a; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; }
-        
-        /* Top Bar */
-        #toolbar { height: 50px; background: #111; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 20px; gap: 20px; }
-        
-        /* Node Area */
-        #canvas { width: 100vw; height: calc(100vh - 50px); background-image: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; }
-        
-        /* Node Style */
-        .node {
-            position: absolute; width: 150px; background: #1a1a1a; border: 2px solid #00ff88;
-            border-radius: 8px; padding: 10px; cursor: move; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            user-select: none;
+        body { background: #050505; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; }
+        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 15px; }
+        #canvas { 
+            width: 100vw; height: 90vh; 
+            background: radial-gradient(#222 1px, transparent 1px); 
+            background-size: 30px 30px; position: relative; 
         }
-        .node-header { font-weight: bold; border-bottom: 1px solid #333; margin-bottom: 5px; padding-bottom: 5px; font-size: 12px; }
-        .node-port { width: 10px; height: 10px; background: #00ff88; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        
-        .btn-save { background: #00ff88; color: #000; border: none; padding: 5px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .eye-status { font-size: 12px; color: #888; margin-left: auto; }
+        .node { 
+            width: 150px; padding: 15px; background: #1a1a1a; 
+            border: 2px solid #00ff88; position: absolute; cursor: move; 
+            border-radius: 10px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .node:active { border-color: #fff; }
+        .btn-add { 
+            background: #00ff88; color: black; border: none; padding: 8px 15px; 
+            cursor: pointer; font-weight: bold; border-radius: 5px; transition: 0.2s;
+        }
+        .btn-add:hover { background: #fff; }
+        .exit-btn { background: #ff4444; color: white; margin-left: auto; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <div id="toolbar">
-        <strong>🌀 ULTRA EDITOR</strong>
-        <button class="btn-save" onclick="addNode('Move')">+ Add Move Node</button>
-        <button class="btn-save" onclick="addNode('Jump')">+ Add Jump Node</button>
-        <button class="btn-save" style="background:#555; color:white;" onclick="alert('Saving to your Email Cloud...')">Save to Cloud</button>
-        <div class="eye-status">🛡️ Eye-Comfort: Active</div>
+    <div id="nav">
+        <strong style="font-size: 20px;">🌀 ULTRA EDITOR</strong>
+        <button class="btn-add" onclick="createNode('Player')">+ Player</button>
+        <button class="btn-add" onclick="createNode('Jump')">+ Jump Logic</button>
+        <button class="btn-add" onclick="createNode('Move')">+ Move Logic</button>
+        <button class="exit-btn" onclick="window.location.href='index.html'">Exit Editor</button>
     </div>
-
-    <div id="canvas" id="canvas">
-        </div>
+    
+    <div id="canvas"></div>
 
     <script>
-        function addNode(type) {
+        function createNode(name) {
             const canvas = document.getElementById('canvas');
-            const node = document.createElement('div');
-            node.className = 'node';
-            node.style.left = '100px';
-            node.style.top = '100px';
-            
-            node.innerHTML = `
-                <div class="node-header">${type.toUpperCase()} NODE</div>
-                <div style="font-size: 10px; color: #888;">
-                    <span class="node-port"></span> Input<br>
-                    <span class="node-port" style="float:right"></span> Output
-                </div>
-            `;
-            
-            canvas.appendChild(node);
-            makeDraggable(node);
+            const n = document.createElement('div');
+            n.className = 'node';
+            n.innerHTML = `<strong>${name}</strong><br><small style="color:#666">Node ID: ${Math.floor(Math.random()*1000)}</small>`;
+            n.style.left = '100px'; 
+            n.style.top = '100px';
+            canvas.appendChild(n);
+            dragElement(n);
         }
 
-        function makeDraggable(el) {
-            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-            el.onmousedown = dragMouseDown;
-
-            function dragMouseDown(e) {
-                e.preventDefault();
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                document.onmouseup = closeDragElement;
-                document.onmousemove = elementDrag;
+        function dragElement(elmnt) {
+            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            elmnt.onmousedown = dragMouseDown;
+            function dragMouseDown(e) { 
+                e.preventDefault(); 
+                pos3 = e.clientX; 
+                pos4 = e.clientY; 
+                document.onmouseup = closeDragElement; 
+                document.onmousemove = elementDrag; 
             }
-
-            function elementDrag(e) {
-                e.preventDefault();
-                pos1 = pos3 - e.clientX;
-                pos2 = pos4 - e.clientY;
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                el.style.top = (el.offsetTop - pos2) + "px";
-                el.style.left = (el.offsetLeft - pos1) + "px";
+            function elementDrag(e) { 
+                e.preventDefault(); 
+                pos1 = pos3 - e.clientX; 
+                pos2 = pos4 - e.clientY; 
+                pos3 = e.clientX; 
+                pos4 = e.clientY; 
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px"; 
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px"; 
             }
-
-            function closeDragElement() {
-                document.onmouseup = null;
-                document.onmousemove = null;
-            }
+            function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
         }
     </script>
 </body>
