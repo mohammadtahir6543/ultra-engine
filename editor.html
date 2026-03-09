@@ -2,156 +2,63 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Ultra Engine | Asset Store</title>
+    <title>Ultra Engine | Free Asset Store</title>
     <style>
         body { background: #000; color: #00ff88; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Nav & Layout */
-        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 1000; }
-        #workspace { display: flex; flex: 1; position: relative; }
-        #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; z-index: 10; }
+        /* Intro & Start Screens */
+        #intro { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 9999; transition: 1s; }
+        #start-screen { position: fixed; inset: 0; background: #050505; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; cursor: pointer; }
+        .ultra-text { font-size: 80px; font-weight: bold; letter-spacing: 20px; animation: glow 2s infinite alternate; }
         
-        /* Side Panels (Settings & Assets) */
-        .panel { width: 220px; background: #0a0a0a; border-left: 2px solid #222; padding: 15px; z-index: 100; overflow-y: auto; }
+        /* Layout */
+        #editor-ui { display: none; flex-direction: column; height: 100vh; }
+        #nav { height: 60px; background: #111; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #222; gap: 10px; z-index: 1000; }
+        #workspace { display: flex; flex: 1; position: relative; overflow: hidden; }
+        
+        /* Panels */
+        #canvas { flex: 1; background: radial-gradient(#222 1px, transparent 1px); background-size: 30px 30px; position: relative; overflow: hidden; z-index: 10; }
+        .panel { width: 230px; background: #0a0a0a; border-left: 2px solid #222; padding: 15px; z-index: 100; overflow-y: auto; }
 
-        /* Asset Box Design */
-        .asset-card { background: #111; border: 1px solid #333; padding: 10px; border-radius: 5px; margin-top: 10px; text-align: center; cursor: pointer; }
-        .asset-card:hover { border-color: #00ff88; }
-        .asset-preview { width: 100%; height: 80px; background: #000; border-radius: 4px; object-fit: contain; }
+        /* Asset Cards */
+        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .asset-card { background: #111; border: 1px solid #333; padding: 5px; border-radius: 5px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .asset-card:hover { border-color: #00ff88; background: #1a1a1a; }
+        .asset-img { width: 100%; height: 60px; object-fit: contain; }
 
         /* Nodes & Preview */
-        .node { width: 140px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 500; cursor: move; }
+        .node { width: 140px; background: #1a1a1a; border: 2px solid #00ff88; position: absolute; border-radius: 8px; z-index: 500; }
         .node-header { background: #00ff88; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 11px; }
-        #play-preview { position: fixed; bottom: 20px; right: 480px; width: 250px; height: 150px; background: #000; border: 2px solid #ffcc00; display: none; z-index: 1000; border-radius: 10px; overflow: hidden; }
-        #player { width: 40px; height: 40px; background: #00ff88; position: absolute; bottom: 10px; left: 10px; background-size: cover; background-position: center; }
+        #play-preview { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 400px; height: 200px; background: #000; border: 2px solid #ffcc00; display: none; z-index: 1000; border-radius: 10px; }
+        #player { width: 40px; height: 40px; background: #00ff88; position: absolute; bottom: 20px; left: 10px; background-size: contain; background-repeat: no-repeat; }
 
         .btn { background: #222; color: #00ff88; border: 1px solid #00ff88; padding: 8px 12px; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        input { background: #111; border: 1px solid #333; color: #fff; padding: 5px; width: 90%; margin-top: 5px; }
+        @keyframes glow { from { text-shadow: 0 0 10px #00ff88; opacity: 0.5; } to { text-shadow: 0 0 40px #00ff88; opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="nav">
-        <strong>🌀 ULTRA EDITOR</strong>
-        <button class="btn" onclick="spawnNode('Move')">+ Move Node</button>
-        <button class="btn" style="background:#ffcc00; color:#000;" onclick="togglePlay()">▶ PLAY</button>
+    <div id="intro"><div class="ultra-text">ULTRA</div></div>
+
+    <div id="start-screen" onclick="launchEditor()">
+        <h1 style="color:#00ff88;">ULTRA ENGINE PRO</h1>
+        <p style="color:#555;">CLICK TO START YOUR PROJECT</p>
     </div>
 
-    <div id="workspace">
-        <div id="canvas"></div>
-        
-        <div class="panel">
-            <h3 style="margin:0; font-size:16px;">Settings</h3>
-            <p id="node-label" style="font-size:12px; color:#555;">Select node</p>
-            <label style="font-size: 12px;">Speed:</label>
-            <input type="number" id="val-input" value="10" oninput="updateVal()">
+    <div id="editor-ui">
+        <div id="nav">
+            <strong>🌀 ULTRA</strong>
+            <button class="btn" onclick="spawnNode('Move')">+ Move Node</button>
+            <button class="btn" style="background:#ffcc00; color:#000;" onclick="togglePlay()">▶ PLAY GAME</button>
+            <button class="btn" style="margin-left:auto;" onclick="alert('Cloud Sync Active')">☁️ Save</button>
         </div>
 
-        <div class="panel" style="border-left: 2px solid #222;">
-            <h3 style="margin:0; font-size:16px; color:#00ff88;">Asset Store</h3>
-            <button class="btn" style="width:100%; margin-top:10px; font-size:11px;" onclick="document.getElementById('fileInput').click()">+ ADD IMAGE</button>
-            <input type="file" id="fileInput" style="display:none" accept="image/*" onchange="uploadAsset(event)">
+        <div id="workspace">
+            <div id="canvas"></div>
             
-            <div id="asset-list">
-                </div>
-        </div>
-    </div>
-
-    <div id="play-preview">
-        <div style="background:#ffcc00; color:#000; font-size:10px; padding:2px 5px; font-weight:bold;">LIVE PREVIEW</div>
-        <div id="player"></div>
-    </div>
-
-    <script>
-        let selectedNode = null;
-        let isPlaying = false;
-        let playerPos = 10;
-        let gameLoop = null;
-        let playerImage = null; // Asli photo yahan save hogi
-
-        function uploadAsset(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const list = document.getElementById('asset-list');
-                    const card = document.createElement('div');
-                    card.className = 'asset-card';
-                    card.innerHTML = `
-                        <img src="${e.target.result}" class="asset-preview">
-                        <p style="font-size:10px; margin:5px 0;">Character Sprite</p>
-                        <button class="btn" style="font-size:9px; padding:3px;" onclick="useAsPlayer('${e.target.result}')">USE AS HERO</button>
-                    `;
-                    list.appendChild(card);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function useAsPlayer(imgData) {
-            playerImage = imgData;
-            alert("Hero character updated!");
-        }
-
-        function spawnNode(type) {
-            const canvas = document.getElementById('canvas');
-            const n = document.createElement('div');
-            n.className = 'node';
-            n.style.left = '50px'; n.style.top = '50px';
-            n.dataset.speed = "10";
-            n.innerHTML = `<div class="node-header">${type}</div><div style="height:40px;"></div>`;
-            n.onclick = (e) => {
-                selectedNode = n;
-                document.getElementById('node-label').innerText = type + " Selected";
-                document.getElementById('val-input').value = n.dataset.speed;
-                e.stopPropagation();
-            };
-            canvas.appendChild(n);
-            drag(n);
-        }
-
-        function updateVal() { if(selectedNode) selectedNode.dataset.speed = document.getElementById('val-input').value; }
-
-        function togglePlay() {
-            const preview = document.getElementById('play-preview');
-            const player = document.getElementById('player');
-            isPlaying = !isPlaying;
-            preview.style.display = isPlaying ? 'block' : 'none';
-
-            if(isPlaying) {
-                // Agar photo select ki hai toh wo dikhao, varna green box
-                if(playerImage) {
-                    player.style.backgroundImage = `url(${playerImage})`;
-                    player.style.backgroundColor = 'transparent';
-                }
-                
-                gameLoop = setInterval(() => {
-                    const node = document.querySelector('.node');
-                    let s = node ? parseInt(node.dataset.speed) / 5 : 2;
-                    playerPos += s;
-                    if(playerPos > 210) playerPos = 0;
-                    player.style.left = playerPos + "px";
-                }, 30);
-            } else {
-                clearInterval(gameLoop);
-                playerPos = 10;
-                player.style.left = "10px";
-            }
-        }
-
-        function drag(el) {
-            let p1=0, p2=0, p3=0, p4=0;
-            el.onmousedown = (e) => {
-                p3 = e.clientX; p4 = e.clientY;
-                document.onmouseup = () => { document.onmouseup=null; document.onmousemove=null; };
-                document.onmousemove = (e) => {
-                    p1 = p3 - e.clientX; p2 = p4 - e.clientY;
-                    p3 = e.clientX; p4 = e.clientY;
-                    el.style.top = (el.offsetTop - p2) + "px";
-                    el.style.left = (el.offsetLeft - p1) + "px";
-                };
-            }
-        }
-    </script>
-</body>
-</html>
+            <div class="panel">
+                <h3 style="margin:0; color:#00ff88; font-size:16px;">FREE ASSETS</h3>
+                <div class="asset-grid">
+                    <div class="asset-card" onclick="setHero('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png')">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" class="asset-img">
+                        <div
